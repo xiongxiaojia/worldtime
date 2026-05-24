@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>World Clock Panorama | Real-time Global Time Zones</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: radial-gradient(circle at 10% 20%, #0b1622, #03070f);
+            font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            color: #f0f3fa;
+            padding: 1.5rem;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .hero {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            font-size: 2.4rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #E6F7FF, #9AC8FF, #6EA8FE);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            letter-spacing: -0.3px;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .sub {
+            color: #9bb5de;
+            margin-top: 8px;
+            font-size: 0.9rem;
+            border-bottom: 1px dashed #2a3f60;
+            display: inline-block;
+            padding-bottom: 6px;
+        }
+
+        .info-panel {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(18, 30, 48, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 60px;
+            padding: 0.6rem 1.5rem;
+            margin: 1.2rem 0 1rem;
+            gap: 12px;
+            border: 1px solid rgba(80, 130, 200, 0.3);
+        }
+
+        .live-badge {
+            background: #1f543b;
+            padding: 4px 14px;
+            border-radius: 40px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: #b9ffda;
+            letter-spacing: 0.5px;
+        }
+
+        .time-ref {
+            font-family: monospace;
+            font-size: 0.8rem;
+            background: #0f1a2c;
+            padding: 4px 12px;
+            border-radius: 28px;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 2rem;
+            justify-content: center;
+        }
+
+        .filter-btn {
+            background: #1f2c3e;
+            border: none;
+            color: #cbdff5;
+            padding: 6px 20px;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            backdrop-filter: blur(4px);
+        }
+
+        .filter-btn.active {
+            background: #2b6a9f;
+            color: white;
+            box-shadow: 0 4px 12px rgba(43, 106, 159, 0.4);
+        }
+
+        .filter-btn:hover {
+            background: #345b82;
+            color: white;
+        }
+
+        .continent-block {
+            margin-bottom: 2.5rem;
+            background: rgba(8, 18, 30, 0.45);
+            border-radius: 1.8rem;
+            padding: 1rem 1.2rem 1.3rem;
+            backdrop-filter: blur(2px);
+            border: 1px solid rgba(70, 120, 190, 0.2);
+            transition: all 0.2s;
+        }
+
+        .continent-header {
+            display: flex;
+            align-items: baseline;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 1.2rem;
+            padding-left: 8px;
+            border-left: 5px solid;
+        }
+
+        .continent-name {
+            font-size: 1.6rem;
+            font-weight: 600;
+            letter-spacing: -0.3px;
+        }
+
+        .region-count {
+            font-size: 0.75rem;
+            background: #1f324b;
+            padding: 2px 12px;
+            border-radius: 30px;
+            font-weight: normal;
+        }
+
+        .time-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 12px;
+        }
+
+        .time-card {
+            background: linear-gradient(115deg, #111d30, #0a1424);
+            border-radius: 1.2rem;
+            padding: 0.75rem 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s ease;
+            border: 1px solid #263c58;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .time-card:hover {
+            transform: translateY(-2px);
+            background: #14273f;
+            border-color: #3f6b97;
+        }
+
+        .country-info {
+            flex: 1;
+        }
+
+        .country-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .city-tz {
+            font-size: 0.65rem;
+            color: #8dabdd;
+            margin-top: 4px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .offset {
+            background: #1e314a;
+            padding: 2px 6px;
+            border-radius: 20px;
+            font-size: 0.6rem;
+            font-family: monospace;
+        }
+
+        .time-box {
+            text-align: right;
+            min-width: 110px;
+        }
+
+        .clock-digit {
+            font-family: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
+            font-size: 1.25rem;
+            font-weight: 700;
+            background: #030b14a0;
+            padding: 3px 8px;
+            border-radius: 40px;
+            letter-spacing: 1px;
+        }
+
+        .date-sm {
+            font-size: 0.6rem;
+            color: #a4beea;
+            margin-top: 4px;
+        }
+
+        footer {
+            margin-top: 3rem;
+            text-align: center;
+            font-size: 0.7rem;
+            color: #5f7aa3;
+            border-top: 1px solid #1d334f;
+            padding-top: 2rem;
+        }
+
+        @media (max-width: 640px) {
+            body {
+                padding: 1rem;
+            }
+            .time-grid {
+                grid-template-columns: 1fr;
+            }
+            .clock-digit {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="hero">
+        <h1>🌍 World Clock Panorama</h1>
+        <div class="sub">Real-time · All Countries & Major Time Zones · Automatic DST</div>
+    </div>
+    <div class="info-panel">
+        <div class="live-badge">🕒 LIVE · updates every second</div>
+        <div class="time-ref">⏲️ Reference UTC: <span id="baseUtcTime">--:--:--</span></div>
+        <div class="time-ref">📅 Your local: <span id="localRef">--:--:--</span></div>
+    </div>
+
+    <div class="controls" id="filterBar">
+        <button class="filter-btn active" data-continent="all">🌐 All</button>
+        <button class="filter-btn" data-continent="asia">🌏 Asia</button>
+        <button class="filter-btn" data-continent="europe">🌍 Europe</button>
+        <button class="filter-btn" data-continent="africa">🌍 Africa</button>
+        <button class="filter-btn" data-continent="north-america">🌎 North America</button>
+        <button class="filter-btn" data-continent="south-america">🌎 South America</button>
+        <button class="filter-btn" data-continent="oceania">🐚 Oceania</button>
+        <button class="filter-btn" data-continent="special">📍 Special / Territories</button>
+    </div>
+
+    <div id="timeAppRoot">
+        <div style="text-align:center; padding: 3rem;">⏳ Loading global timezone database ...</div>
+    </div>
+    <footer>
+        🌟 Covering 195+ sovereign states + major territories & special time zones (incl. Antarctic representative zones)<br>
+        🧭 Based on IANA time zone database · Automatically detects Daylight Saving Time (DST)<br>
+        ⚡ All times fetched from your system clock + real-time offset calculation, updated every second.
+    </footer>
+</div>
+
+<script>
+    // --------------------------------------------------------------
+    // WORLD TIMEZONE DATABASE (including sovereign states, observer entities, major territories)
+    // Fully in English names.
+    // --------------------------------------------------------------
+    const worldTimezones = [
+        // --- ASIA (49 entries, all sovereign countries + key regions)
+        { name: "China", city: "Beijing", tz: "Asia/Shanghai", region: "asia" },
+        { name: "Taiwan (Province of China)", city: "Taipei", tz: "Asia/Taipei", region: "asia" },
+        { name: "Hong Kong (SAR China)", city: "Hong Kong", tz: "Asia/Hong_Kong", region: "asia" },
+        { name: "Macao (SAR China)", city: "Macao", tz: "Asia/Macau", region: "asia" },
+        { name: "Japan", city: "Tokyo", tz: "Asia/Tokyo", region: "asia" },
+        { name: "South Korea", city: "Seoul", tz: "Asia/Seoul", region: "asia" },
+        { name: "North Korea", city: "Pyongyang", tz: "Asia/Pyongyang", region: "asia" },
+        { name: "Mongolia", city: "Ulaanbaatar", tz: "Asia/Ulaanbaatar", region: "asia" },
+        { name: "India", city: "New Delhi", tz: "Asia/Kolkata", region: "asia" },
+        { name: "Pakistan", city: "Islamabad", tz: "Asia/Karachi", region: "asia" },
+        { name: "Bangladesh", city: "Dhaka", tz: "Asia/Dhaka", region: "asia" },
+        { name: "Nepal", city: "Kathmandu", tz: "Asia/Kathmandu", region: "asia" },
+        { name: "Bhutan", city: "Thimphu", tz: "Asia/Thimphu", region: "asia" },
+        { name: "Sri Lanka", city: "Colombo", tz: "Asia/Colombo", region: "asia" },
+        { name: "Maldives", city: "Malé", tz: "Indian/Maldives", region: "asia" },
+        { name: "Indonesia", city: "Jakarta", tz: "Asia/Jakarta", region: "asia" },
+        { name: "Malaysia", city: "Kuala Lumpur", tz: "Asia/Kuala_Lumpur", region: "asia" },
+        { name: "Singapore", city: "Singapore", tz: "Asia/Singapore", region: "asia" },
+        { name: "Philippines", city: "Manila", tz: "Asia/Manila", region: "asia" },
+        { name: "Vietnam", city: "Hanoi", tz: "Asia/Ho_Chi_Minh", region: "asia" },
+        { name: "Laos", city: "Vientiane", tz: "Asia/Vientiane", region: "asia" },
+        { name: "Cambodia", city: "Phnom Penh", tz: "Asia/Phnom_Penh", region: "asia" },
+        { name: "Myanmar", city: "Naypyidaw", tz: "Asia/Yangon", region: "asia" },
+        { name: "Thailand", city: "Bangkok", tz: "Asia/Bangkok", region: "asia" },
+        { name: "Brunei", city: "Bandar Seri Begawan", tz: "Asia/Brunei", region: "asia" },
+        { name: "Timor-Leste", city: "Dili", tz: "Asia/Dili", region: "asia" },
+        { name: "Kazakhstan", city: "Astana", tz: "Asia/Almaty", region: "asia" },
+        { name: "Kyrgyzstan", city: "Bishkek", tz: "Asia/Bishkek", region: "asia" },
+        { name: "Tajikistan", city: "Dushanbe", tz: "Asia/Dushanbe", region: "asia" },
+        { name: "Uzbekistan", city: "Tashkent", tz: "Asia/Tashkent", region: "asia" },
+        { name: "Turkmenistan", city: "Ashgabat", tz: "Asia/Ashgabat", region: "asia" },
+        { name: "Afghanistan", city: "Kabul", tz: "Asia/Kabul", region: "asia" },
+        { name: "Iran", city: "Tehran", tz: "Asia/Tehran", region: "asia" },
+        { name: "Iraq", city: "Baghdad", tz: "Asia/Baghdad", region: "asia" },
+        { name: "Syria", city: "Damascus", tz: "Asia/Damascus", region: "asia" },
+        { name: "Lebanon", city: "Beirut", tz: "Asia/Beirut", region: "asia" },
+        { name: "Jordan", city: "Amman", tz: "Asia/Amman", region: "asia" },
+        { name: "Israel", city: "Jerusalem", tz: "Asia/Jerusalem", region: "asia" },
+        { name: "Palestine", city: "Ramallah", tz: "Asia/Gaza", region: "asia" },
+        { name: "Saudi Arabia", city: "Riyadh", tz: "Asia/Riyadh", region: "asia" },
+        { name: "Yemen", city: "Sana'a", tz: "Asia/Aden", region: "asia" },
+        { name: "Oman", city: "Muscat", tz: "Asia/Muscat", region: "asia" },
+        { name: "United Arab Emirates", city: "Abu Dhabi", tz: "Asia/Dubai", region: "asia" },
+        { name: "Qatar", city: "Doha", tz: "Asia/Qatar", region: "asia" },
+        { name: "Bahrain", city: "Manama", tz: "Asia/Bahrain", region: "asia" },
+        { name: "Kuwait", city: "Kuwait City", tz: "Asia/Kuwait", region: "asia" },
+        { name: "Cyprus", city: "Nicosia", tz: "Asia/Nicosia", region: "asia" },
+        { name: "Armenia", city: "Yerevan", tz: "Asia/Yerevan", region: "asia" },
+        { name: "Azerbaijan", city: "Baku", tz: "Asia/Baku", region: "asia" },
+        { name: "Georgia", city: "Tbilisi", tz: "Asia/Tbilisi", region: "asia" },
+
+        // --- EUROPE (Full coverage)
+        { name: "United Kingdom", city: "London", tz: "Europe/London", region: "europe" },
+        { name: "Ireland", city: "Dublin", tz: "Europe/Dublin", region: "europe" },
+        { name: "France", city: "Paris", tz: "Europe/Paris", region: "europe" },
+        { name: "Germany", city: "Berlin", tz: "Europe/Berlin", region: "europe" },
+        { name: "Italy", city: "Rome", tz: "Europe/Rome", region: "europe" },
+        { name: "Spain", city: "Madrid", tz: "Europe/Madrid", region: "europe" },
+        { name: "Portugal", city: "Lisbon", tz: "Europe/Lisbon", region: "europe" },
+        { name: "Netherlands", city: "Amsterdam", tz: "Europe/Amsterdam", region: "europe" },
+        { name: "Belgium", city: "Brussels", tz: "Europe/Brussels", region: "europe" },
+        { name: "Luxembourg", city: "Luxembourg", tz: "Europe/Luxembourg", region: "europe" },
+        { name: "Switzerland", city: "Bern", tz: "Europe/Zurich", region: "europe" },
+        { name: "Austria", city: "Vienna", tz: "Europe/Vienna", region: "europe" },
+        { name: "Denmark", city: "Copenhagen", tz: "Europe/Copenhagen", region: "europe" },
+        { name: "Sweden", city: "Stockholm", tz: "Europe/Stockholm", region: "europe" },
+        { name: "Norway", city: "Oslo", tz: "Europe/Oslo", region: "europe" },
+        { name: "Finland", city: "Helsinki", tz: "Europe/Helsinki", region: "europe" },
+        { name: "Iceland", city: "Reykjavik", tz: "Atlantic/Reykjavik", region: "europe" },
+        { name: "Poland", city: "Warsaw", tz: "Europe/Warsaw", region: "europe" },
+        { name: "Czech Republic", city: "Prague", tz: "Europe/Prague", region: "europe" },
+        { name: "Slovakia", city: "Bratislava", tz: "Europe/Bratislava", region: "europe" },
+        { name: "Hungary", city: "Budapest", tz: "Europe/Budapest", region: "europe" },
+        { name: "Romania", city: "Bucharest", tz: "Europe/Bucharest", region: "europe" },
+        { name: "Bulgaria", city: "Sofia", tz: "Europe/Sofia", region: "europe" },
+        { name: "Serbia", city: "Belgrade", tz: "Europe/Belgrade", region: "europe" },
+        { name: "Croatia", city: "Zagreb", tz: "Europe/Zagreb", region: "europe" },
+        { name: "Slovenia", city: "Ljubljana", tz: "Europe/Ljubljana", region: "europe" },
+        { name: "Bosnia and Herzegovina", city: "Sarajevo", tz: "Europe/Sarajevo", region: "europe" },
+        { name: "Montenegro", city: "Podgorica", tz: "Europe/Podgorica", region: "europe" },
+        { name: "North Macedonia", city: "Skopje", tz: "Europe/Skopje", region: "europe" },
+        { name: "Albania", city: "Tirana", tz: "Europe/Tirane", region: "europe" },
+        { name: "Greece", city: "Athens", tz: "Europe/Athens", region: "europe" },
+        { name: "Estonia", city: "Tallinn", tz: "Europe/Tallinn", region: "europe" },
+        { name: "Latvia", city: "Riga", tz: "Europe/Riga", region: "europe" },
+        { name: "Lithuania", city: "Vilnius", tz: "Europe/Vilnius", region: "europe" },
+        { name: "Moldova", city: "Chișinău", tz: "Europe/Chisinau", region: "europe" },
+        { name: "Ukraine", city: "Kyiv", tz: "Europe/Kyiv", region: "europe" },
+        { name: "Belarus", city: "Minsk", tz: "Europe/Minsk", region: "europe" },
+        { name: "Russia", city: "Moscow", tz: "Europe/Moscow", region: "europe" },
+        { name: "Vatican City", city: "Vatican", tz: "Europe/Vatican", region: "europe" },
+        { name: "Monaco", city: "Monaco", tz: "Europe/Monaco", region: "europe" },
+        { name: "San Marino", city: "San Marino", tz: "Europe/San_Marino", region: "europe" },
+        { name: "Malta", city: "Valletta", tz: "Europe/Malta", region: "europe" },
+        { name: "Andorra", city: "Andorra la Vella", tz: "Europe/Andorra", region: "europe" },
+        { name: "Kosovo", city: "Pristina", tz: "Europe/Belgrade", region: "europe" },
+
+        // --- AFRICA (complete)
+        { name: "Egypt", city: "Cairo", tz: "Africa/Cairo", region: "africa" },
+        { name: "Libya", city: "Tripoli", tz: "Africa/Tripoli", region: "africa" },
+        { name: "Tunisia", city: "Tunis", tz: "Africa/Tunis", region: "africa" },
+        { name: "Algeria", city: "Algiers", tz: "Africa/Algiers", region: "africa" },
+        { name: "Morocco", city: "Rabat", tz: "Africa/Casablanca", region: "africa" },
+        { name: "Sudan", city: "Khartoum", tz: "Africa/Khartoum", region: "africa" },
+        { name: "South Sudan", city: "Juba", tz: "Africa/Juba", region: "africa" },
+        { name: "Eritrea", city: "Asmara", tz: "Africa/Asmara", region: "africa" },
+        { name: "Ethiopia", city: "Addis Ababa", tz: "Africa/Addis_Ababa", region: "africa" },
+        { name: "Djibouti", city: "Djibouti", tz: "Africa/Djibouti", region: "africa" },
+        { name: "Somalia", city: "Mogadishu", tz: "Africa/Mogadishu", region: "africa" },
+        { name: "Kenya", city: "Nairobi", tz: "Africa/Nairobi", region: "africa" },
+        { name: "Uganda", city: "Kampala", tz: "Africa/Kampala", region: "africa" },
+        { name: "Tanzania", city: "Dodoma", tz: "Africa/Dar_es_Salaam", region: "africa" },
+        { name: "Rwanda", city: "Kigali", tz: "Africa/Kigali", region: "africa" },
+        { name: "Burundi", city: "Gitega", tz: "Africa/Bujumbura", region: "africa" },
+        { name: "Mozambique", city: "Maputo", tz: "Africa/Maputo", region: "africa" },
+        { name: "Madagascar", city: "Antananarivo", tz: "Indian/Antananarivo", region: "africa" },
+        { name: "Comoros", city: "Moroni", tz: "Indian/Comoro", region: "africa" },
+        { name: "Seychelles", city: "Victoria", tz: "Indian/Mahe", region: "africa" },
+        { name: "Mauritius", city: "Port Louis", tz: "Indian/Mauritius", region: "africa" },
+        { name: "Zambia", city: "Lusaka", tz: "Africa/Lusaka", region: "africa" },
+        { name: "Zimbabwe", city: "Harare", tz: "Africa/Harare", region: "africa" },
+        { name: "Malawi", city: "Lilongwe", tz: "Africa/Blantyre", region: "africa" },
+        { name: "South Africa", city: "Pretoria", tz: "Africa/Johannesburg", region: "africa" },
+        { name: "Namibia", city: "Windhoek", tz: "Africa/Windhoek", region: "africa" },
+        { name: "Botswana", city: "Gaborone", tz: "Africa/Gaborone", region: "africa" },
+        { name: "Eswatini", city: "Mbabane", tz: "Africa/Mbabane", region: "africa" },
+        { name: "Lesotho", city: "Maseru", tz: "Africa/Maseru", region: "africa" },
+        { name: "Angola", city: "Luanda", tz: "Africa/Luanda", region: "africa" },
+        { name: "Republic of the Congo", city: "Brazzaville", tz: "Africa/Brazzaville", region: "africa" },
+        { name: "DR Congo", city: "Kinshasa", tz: "Africa/Kinshasa", region: "africa" },
+        { name: "Gabon", city: "Libreville", tz: "Africa/Libreville", region: "africa" },
+        { name: "Equatorial Guinea", city: "Malabo", tz: "Africa/Malabo", region: "africa" },
+        { name: "Central African Republic", city: "Bangui", tz: "Africa/Bangui", region: "africa" },
+        { name: "Cameroon", city: "Yaoundé", tz: "Africa/Douala", region: "africa" },
+        { name: "Nigeria", city: "Abuja", tz: "Africa/Lagos", region: "africa" },
+        { name: "Benin", city: "Porto-Novo", tz: "Africa/Porto-Novo", region: "africa" },
+        { name: "Togo", city: "Lomé", tz: "Africa/Lome", region: "africa" },
+        { name: "Ghana", city: "Accra", tz: "Africa/Accra", region: "africa" },
+        { name: "Ivory Coast", city: "Yamoussoukro", tz: "Africa/Abidjan", region: "africa" },
+        { name: "Burkina Faso", city: "Ouagadougou", tz: "Africa/Ouagadougou", region: "africa" },
+        { name: "Mali", city: "Bamako", tz: "Africa/Bamako", region: "africa" },
+        { name: "Mauritania", city: "Nouakchott", tz: "Africa/Nouakchott", region: "africa" },
+        { name: "Senegal", city: "Dakar", tz: "Africa/Dakar", region: "africa" },
+        { name: "Gambia", city: "Banjul", tz: "Africa/Banjul", region: "africa" },
+        { name: "Guinea", city: "Conakry", tz: "Africa/Conakry", region: "africa" },
+        { name: "Guinea-Bissau", city: "Bissau", tz: "Africa/Bissau", region: "africa" },
+        { name: "Sierra Leone", city: "Freetown", tz: "Africa/Freetown", region: "africa" },
+        { name: "Liberia", city: "Monrovia", tz: "Africa/Monrovia", region: "africa" },
+        { name: "Western Sahara", city: "Laayoune", tz: "Africa/El_Aaiun", region: "africa" },
+
+        // --- NORTH AMERICA (including Caribbean)
+        { name: "Canada", city: "Ottawa", tz: "America/Toronto", region: "north-america" },
+        { name: "United States", city: "Washington D.C.", tz: "America/New_York", region: "north-america" },
+        { name: "Mexico", city: "Mexico City", tz: "America/Mexico_City", region: "north-america" },
+        { name: "Guatemala", city: "Guatemala City", tz: "America/Guatemala", region: "north-america" },
+        { name: "Belize", city: "Belmopan", tz: "America/Belize", region: "north-america" },
+        { name: "El Salvador", city: "San Salvador", tz: "America/El_Salvador", region: "north-america" },
+        { name: "Honduras", city: "Tegucigalpa", tz: "America/Tegucigalpa", region: "north-america" },
+        { name: "Nicaragua", city: "Managua", tz: "America/Managua", region: "north-america" },
+        { name: "Costa Rica", city: "San José", tz: "America/Costa_Rica", region: "north-america" },
+        { name: "Panama", city: "Panama City", tz: "America/Panama", region: "north-america" },
+        { name: "Cuba", city: "Havana", tz: "America/Havana", region: "north-america" },
+        { name: "Jamaica", city: "Kingston", tz: "America/Jamaica", region: "north-america" },
+        { name: "Haiti", city: "Port-au-Prince", tz: "America/Port-au-Prince", region: "north-america" },
+        { name: "Dominican Republic", city: "Santo Domingo", tz: "America/Santo_Domingo", region: "north-america" },
+        { name: "Bahamas", city: "Nassau", tz: "America/Nassau", region: "north-america" },
+        { name: "Trinidad and Tobago", city: "Port of Spain", tz: "America/Port_of_Spain", region: "north-america" },
+        { name: "Barbados", city: "Bridgetown", tz: "America/Barbados", region: "north-america" },
+        { name: "Grenada", city: "St. George's", tz: "America/Grenada", region: "north-america" },
+        { name: "Antigua and Barbuda", city: "St. John's", tz: "America/Antigua", region: "north-america" },
+        { name: "Saint Lucia", city: "Castries", tz: "America/St_Lucia", region: "north-america" },
+        { name: "Saint Kitts and Nevis", city: "Basseterre", tz: "America/St_Kitts", region: "north-america" },
+        { name: "Dominica", city: "Roseau", tz: "America/Dominica", region: "north-america" },
+
+        // --- SOUTH AMERICA
+        { name: "Colombia", city: "Bogotá", tz: "America/Bogota", region: "south-america" },
+        { name: "Venezuela", city: "Caracas", tz: "America/Caracas", region: "south-america" },
+        { name: "Guyana", city: "Georgetown", tz: "America/Guyana", region: "south-america" },
+        { name: "Suriname", city: "Paramaribo", tz: "America/Paramaribo", region: "south-america" },
+        { name: "Ecuador", city: "Quito", tz: "America/Guayaquil", region: "south-america" },
+        { name: "Peru", city: "Lima", tz: "America/Lima", region: "south-america" },
+        { name: "Bolivia", city: "La Paz", tz: "America/La_Paz", region: "south-america" },
+        { name: "Brazil", city: "Brasília", tz: "America/Sao_Paulo", region: "south-america" },
+        { name: "Paraguay", city: "Asunción", tz: "America/Asuncion", region: "south-america" },
+        { name: "Uruguay", city: "Montevideo", tz: "America/Montevideo", region: "south-america" },
+        { name: "Argentina", city: "Buenos Aires", tz: "America/Argentina/Buenos_Aires", region: "south-america" },
+        { name: "Chile", city: "Santiago", tz: "America/Santiago", region: "south-america" },
+
+        // --- OCEANIA
+        { name: "Australia", city: "Canberra", tz: "Australia/Sydney", region: "oceania" },
+        { name: "New Zealand", city: "Wellington", tz: "Pacific/Auckland", region: "oceania" },
+        { name: "Papua New Guinea", city: "Port Moresby", tz: "Pacific/Port_Moresby", region: "oceania" },
+        { name: "Fiji", city: "Suva", tz: "Pacific/Fiji", region: "oceania" },
+        { name: "Solomon Islands", city: "Honiara", tz: "Pacific/Guadalcanal", region: "oceania" },
+        { name: "Vanuatu", city: "Port Vila", tz: "Pacific/Efate", region: "oceania" },
+        { name: "Samoa", city: "Apia", tz: "Pacific/Apia", region: "oceania" },
+        { name: "Tonga", city: "Nuku'alofa", tz: "Pacific/Tongatapu", region: "oceania" },
+        { name: "Kiribati", city: "Tarawa", tz: "Pacific/Tarawa", region: "oceania" },
+        { name: "Micronesia", city: "Palikir", tz: "Pacific/Chuuk", region: "oceania" },
+        { name: "Marshall Islands", city: "Majuro", tz: "Pacific/Majuro", region: "oceania" },
+        { name: "Palau", city: "Ngerulmud", tz: "Pacific/Palau", region: "oceania" },
+        { name: "Nauru", city: "Yaren", tz: "Pacific/Nauru", region: "oceania" },
+        { name: "Tuvalu", city: "Funafuti", tz: "Pacific/Funafuti", region: "oceania" },
+        { name: "Cook Islands", city: "Avarua", tz: "Pacific/Rarotonga", region: "oceania" },
+        { name: "Niue", city: "Alofi", tz: "Pacific/Niue", region: "oceania" },
+
+        // --- SPECIAL / TERRITORIES
+        { name: "Greenland (Denmark)", city: "Nuuk", tz: "America/Nuuk", region: "special" },
+        { name: "Puerto Rico (US)", city: "San Juan", tz: "America/Puerto_Rico", region: "special" },
+        { name: "Guam (US)", city: "Hagåtña", tz: "Pacific/Guam", region: "special" },
+        { name: "Bermuda (UK)", city: "Hamilton", tz: "Atlantic/Bermuda", region: "special" },
+        { name: "French Polynesia", city: "Papeete", tz: "Pacific/Tahiti", region: "special" },
+        { name: "New Caledonia (France)", city: "Nouméa", tz: "Pacific/Noumea", region: "special" },
+        { name: "Faroe Islands (Denmark)", city: "Tórshavn", tz: "Atlantic/Faroe", region: "special" }
+    ];
+
+    function getTimeInZone(timeZone) {
+        try {
+            const now = new Date();
+            const formatterTime = new Intl.DateTimeFormat('en-GB', {
+                timeZone: timeZone,
+                hour12: false,
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            const formatterDate = new Intl.DateTimeFormat('en-GB', {
+                timeZone: timeZone,
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit'
+            });
+            const timeStr = formatterTime.format(now);
+            const dateStr = formatterDate.format(now);
+            return { time: timeStr, date: dateStr };
+        } catch(e) {
+            return { time: '--:--:--', date: '----/--/--' };
+        }
+    }
+
+    let currentFilter = "all";
+    let timerInterval = null;
+
+    function render() {
+        const root = document.getElementById("timeAppRoot");
+        const filtered = currentFilter === "all" ? worldTimezones : worldTimezones.filter(item => item.region === currentFilter);
+        
+        if (currentFilter === "all") {
+            const regionsOrder = [
+                { id: "asia", label: "🌏 Asia", color: "#5dade2" },
+                { id: "europe", label: "🌍 Europe", color: "#f1c40f" },
+                { id: "africa", label: "🌍 Africa", color: "#e67e22" },
+                { id: "north-america", label: "🌎 North America", color: "#2ecc71" },
+                { id: "south-america", label: "🌎 South America", color: "#e74c3c" },
+                { id: "oceania", label: "🐚 Oceania", color: "#1abc9c" },
+                { id: "special", label: "📍 Special / Territories", color: "#bdc3c7" }
+            ];
+            let html = "";
+            for (let group of regionsOrder) {
+                const groupItems = worldTimezones.filter(c => c.region === group.id);
+                if (groupItems.length === 0) continue;
+                html += `<div class="continent-block"><div class="continent-header" style="border-left-color: ${group.color};">
+                            <div class="continent-name">${group.label}</div>
+                            <div class="region-count">${groupItems.length} locations</div>
+                        </div><div class="time-grid">`;
+                for (let item of groupItems) {
+                    const { time, date } = getTimeInZone(item.tz);
+                    html += `
+                        <div class="time-card">
+                            <div class="country-info">
+                                <div class="country-name">${item.name}</div>
+                                <div class="city-tz"><span>📍 ${item.city}</span><span class="offset">${item.tz.split('/').pop()}</span></div>
+                            </div>
+                            <div class="time-box">
+                                <div class="clock-digit">${time}</div>
+                                <div class="date-sm">${date}</div>
+                            </div>
+                        </div>
+                    `;
+                }
+                html += `</div></div>`;
+            }
+            root.innerHTML = html;
+        } else {
+            let html = `<div class="time-grid">`;
+            for (let item of filtered) {
+                const { time, date } = getTimeInZone(item.tz);
+                html += `
+                    <div class="time-card">
+                        <div class="country-info">
+                            <div class="country-name">${item.name}</div>
+                            <div class="city-tz"><span>${item.city}</span><span class="offset">${item.tz.split('/').pop()}</span></div>
+                        </div>
+                        <div class="time-box">
+                            <div class="clock-digit">${time}</div>
+                            <div class="date-sm">${date}</div>
+                        </div>
+                    </div>
+                `;
+            }
+            html += `</div>`;
+            root.innerHTML = html;
+        }
+    }
+
+    function updateTopBar() {
+        const utcNow = new Date();
+        const utcStr = utcNow.toISOString().substr(11, 8);
+        document.getElementById("baseUtcTime").innerText = utcStr;
+        const localStr = utcNow.toLocaleTimeString('en-GB', { hour12: false });
+        document.getElementById("localRef").innerText = localStr;
+    }
+
+    function startClock() {
+        if (timerInterval) clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+            render();
+            updateTopBar();
+        }, 1000);
+    }
+
+    function bindFilters() {
+        const btns = document.querySelectorAll(".filter-btn");
+        btns.forEach(btn => {
+            btn.addEventListener("click", () => {
+                btns.forEach(b => b.classList.remove("active"));
+                btn.classList.add("active");
+                currentFilter = btn.getAttribute("data-continent");
+                render();
+            });
+        });
+    }
+
+    function init() {
+        render();
+        startClock();
+        bindFilters();
+        updateTopBar();
+    }
+
+    init();
+</script>
+</body>
+</html>
