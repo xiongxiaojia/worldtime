@@ -1,4 +1,4 @@
-<!DOCTYPE html>   < !DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -733,7 +733,7 @@
                         <div class="time-card">
                             <div class="country-info">
                                 <div class="country-name">${item.name}</div>
-                                <div class="city-tz"><span>📍 ${item.city}</span><span class="offset">${item.tz.split('/').pop()}</span></div><div class="city-tz"><span>📍 ${item.city}</span><span class="offset">${item.tz.split('/').pop()}</span></div>
+                                <div class="city-tz"><span>📍 ${item.city}</span><span class="offset">${item.tz.split('/').pop()}</span></div>
                             </div>
                             <div class="time-box">
                                 <div class="clock-digit">${time}</div>
@@ -742,62 +742,62 @@
                         </div>
                     `;
                 }
-                html += `</div></div>`;
+                html += `</div></div>`;   html   超文本标记语言  = `</div></div>`;
             }
-            root.innerHTML = html;
+            root.innerHTML = html;   根。innerHTML = html   超文本标记语言;
         } else {
-            let html = `<div class="time-grid">`;
+            let html = `<div class="time-grid">`;let   让   超文本标记语言 html      超文本标记语言超文本标记语言 = `<div class="time-grid">`;
             for (let item of filtered) {
                 const { time, date } = getTimeInZone(item.tz);
-                html += `
-                    <div class="time-card">
-                        <div class="country-info">
-                            <div class="country-name">${item.name}</div>
-                            <div class="city-tz"><span>${item.city}</span><span class="offset">${item.tz.split('/').pop()}</span></div>
-                        </div>
-                        <div class="time-box">
-                            <div class="clock-digit">${time}</div>
-                            <div class="date-sm">${date}</div>
-                        </div>
-                    </div>
+                html += `   HTML = '
+                    <div class="time-card">   <div class="time-card">
+                        <div class="country-info"><div class="country-info">
+                            <div class="country-name">${item.name}</div><div class="country-name">${item.name   名字}</div>
+                            <div class="city-tz"><span>${item.city}</span><span class="offset">${item.tz.split('/').pop()}</span></div><div class="city-tz"><span>${item.city}</span><span class="offset">${item.tz.split('/').pop()}</span></div>
+                        </div>   < / div>
+                        <div class="time-box">   <div class="time-box">
+                            <div class="clock-digit">${time}</div><div class="clock-digit">${time}</div>
+                            <div class="date-sm">${date}</div><div class="date-sm">${date}</div>
+                        </div>   < / div>
+                    </div>   < / div>
                 `;
             }
-            html   超文本标记语言 += `</div>`;
-            root.innerHTML = html   超文本标记语言;
+            html   超文本标记语言 += `</div>`   < / div>”;
+            root   根.innerHTML = html   超文本标记语言;   根。innerHTML = html   超文本标记语言;
         }
     }
 
-    function updateTopBar() {
-        const utcNow = new   新    日期Date();
-        const utcStr = utcNow.toISOString().substr(11, 8);
-        document.getElementById("baseUtcTime").innerText = utcStr;document.getElementById("baseUtcTime").innerText = utcStr;
-        const localStr = utcNow.toLocaleTimeString('en-GB', { hour12: false   假 });
-        document.getElementById("localRef").innerText = localStr;document.getElementById("localRef").innerText = localStr;
+    function   函数 updateTopBar() {
+        const   常量 utcNow = new   新    日期Date();
+        const   常量 utcStr = utcNow.toISOString().substr   字符串的子串(11, 8);
+        document   文档.getElementById("baseUtcTime"   "baseUtcTime"   "baseUtcTime"   "baseUtcTime").innerText = utcStr;document   文档.getElementById("baseUtcTime"   "baseUtcTime"   "baseUtcTime"   "baseUtcTime").innerText = utcStr;
+        const   常量 localStr = utcNow.toLocaleTimeString('en-GB'   “en”, { hour12: false   假 });
+        document   文档.getElementById("localRef"   "localRef"   "localRef"   "localRef").innerText = localStr;document   文档.getElementById("localRef"   "localRef"   "localRef"   "localRef").innerText = localStr;
     }
 
-    function startClock() {
-        if (timerInterval) clearInterval(timerInterval);
+    function   函数 startClock() {
+        if   如果 (timerInterval) clearInterval(timerInterval);
         timerInterval = setInterval(() => {timerInterval = setInterval(() => {
-               呈现();render();
+               呈现();render         渲染渲染渲染();
             updateTopBar();
         }, 1000);
     }
 
-    function bindFilters() {
-        const btns = document.querySelectorAll(".filter-btn");
-        btns.forEach(btn => {   btns .“Btn =>{”
-            btn.addEventListener("click", () => {btn.addEventListener("click", () => {
-                btns.forEach(b => b.classList.remove("active"));
-                btn.classList.add("active");btn.classList.add("active");
-                currentFilter = btn.getAttribute("data-continent");currentFilter = btn.getAttribute("data-continent");
-                render();   呈现();
+    function   函数 bindFilters() {
+        const   常量 btns = document   文档.querySelectorAll(".filter-btn"   “.filter-btn");
+           btns .“Btn   “ Btn =>{”btns.forEach(btn => {
+            btn.addEventListener("click"   "click"   "click"   "click"   "click"   "click"   "click"   "click"   "click"   "click"   "click"   "click"   "click"   "click"   "click"   "click"   "click"   "click"   "click"   "click"   "click"   "click"   "click", () => {btn.addEventListener("click"   "click"   "click"   "click"   "click"   "click"   "click"   "click"   "click"   "click"   "click"   "click"   "click"   "click"   "click"   "click"   "click"   "click"   "click"   "click"   "click"   "click"   "click"   "click"   "click"   "click"   "click"   "click"   "click"   "click"   "click"   "click"   "click"   "click", () => {
+                btns.forEach(b => b.classList   班级名册   班级名册   班级名册.remove   删除   删除   删除("active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   活跃的   "active   "active   活跃的""));
+                btn.classList   班级名册   班级名册   班级名册   班级名册   班级名册.add   添加   添加   添加   添加   添加("active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active");btn.classList   班级名册   班级名册   班级名册.add   添加   添加   添加("active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"      活跃的"active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active"   "active");   "active"      "active""active"
+                currentFilter = btn.getAttribute("data-continent"   "data-continent"   "data-continent"   "data-continent"   "data-continent"   "data-continent"   "data-continent"   "data-continent"   "data-continent"   "data-continent"   "data-continent"   "data-continent"   "data-continent"   "data-continent"   "data-continent");currentFilter = btn.getAttribute("data-continent"   "data-continent"   "data-continent"   "data-continent"   "data-continent"   "data-continent"   "data-continent");
+                   呈现();render      渲染渲染();
             });
         });
     }
 
     // 页面启动
-    function init() {   函数init() {
-        render();   呈现();
+       函数init() {function   函数   初始化 init      初始化初始化() {
+           呈现();render      渲染渲染();
         startClock();
         bindFilters();
         updateTopBar();
@@ -805,7 +805,7 @@
         initPopup();
     }
     
-    init();
-</script>   < / script>
-</body>   < / body>
-</   & lt;html>   < / html>
+    init   初始化();
+</   & lt;script>   < / script>   </   & lt;script>   < / script>
+</body>   < / body>   “身体”“身体”
+    </html>   < / html>
