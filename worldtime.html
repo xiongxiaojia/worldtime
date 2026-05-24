@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html>   < !DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -232,6 +232,96 @@
             padding-top: 2rem;
         }
 
+        /* 右下角浮动弹窗样式 - 可关闭 */
+        .floating-popup {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 340px;
+            max-width: calc(100% - 40px);
+            background: linear-gradient(145deg, #121e2e, #0a1220);
+            border-radius: 1.5rem;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(80, 150, 220, 0.3);
+            z-index: 1100;
+            backdrop-filter: blur(4px);
+            transition: transform 0.25s ease, opacity 0.2s ease;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .floating-popup.hidden {
+            opacity: 0;
+            transform: translateY(30px);
+            pointer-events: none;
+            visibility: hidden;
+        }
+
+        .popup-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            background: rgba(25, 45, 70, 0.85);
+            border-top-left-radius: 1.5rem;
+            border-top-right-radius: 1.5rem;
+            border-bottom: 1px solid #2a4568;
+            cursor: move;
+        }
+
+        .popup-title {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #c3e2ff;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .close-popup {
+            background: none;
+            border: none;
+            color: #9ab3d4;
+            font-size: 1.4rem;
+            line-height: 1;
+            cursor: pointer;
+            padding: 0 4px;
+            transition: 0.2s;
+            border-radius: 20px;
+        }
+
+        .close-popup:hover {
+            color: #ff8a6f;
+            background: rgba(255,255,255,0.1);
+        }
+
+        .popup-body {
+            padding: 0.5rem;
+            background: #0e1728;
+            border-bottom-left-radius: 1.5rem;
+            border-bottom-right-radius: 1.5rem;
+        }
+
+        .popup-iframe {
+            width: 100%;
+            height: 280px;
+            border: none;
+            border-radius: 1rem;
+            background: white;
+            display: block;
+        }
+
+        /* 让弹窗在手机屏幕上稍微小一点 */
+        @media (max-width: 560px) {
+            .floating-popup {
+                width: 280px;
+                bottom: 16px;
+                right: 16px;
+            }
+            .popup-iframe {
+                height: 240px;
+            }
+        }
+
         @media (max-width: 640px) {
             body {
                 padding: 1rem;
@@ -276,6 +366,19 @@
         🧭 Based on IANA time zone database · Automatically detects Daylight Saving Time (DST)<br>
         ⚡ All times fetched from your system clock + real-time offset calculation, updated every second.
     </footer>
+</div>
+
+<!-- 右下角浮动弹窗 (可关闭) -->
+<div id="floatingPopup" class="floating-popup">
+    <div class="popup-header" id="popupHeader">
+        <div class="popup-title">
+            🔗 Sponsored Content
+        </div>
+        <button class="close-popup" id="closePopupBtn" aria-label="Close">✕</button>
+    </div>
+    <div class="popup-body">
+        <iframe id="popupIframe" class="popup-iframe" src="about:blank" title="External content" sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-modals"></iframe>
+    </div>
 </div>
 
 <script>
@@ -501,6 +604,80 @@
         { name: "Faroe Islands (Denmark)", city: "Tórshavn", tz: "Atlantic/Faroe", region: "special" }
     ];
 
+    // 指定要展示的目标链接
+    const TARGET_URL = "https://www.effectivecpmnetwork.com/sinv5i6i?key=781fa2cc1de0bcfa1a5f67423d7fc695";
+
+    // 获取弹窗元素
+    const popupElement = document.getElementById('floatingPopup');
+    const closePopupBtn = document.getElementById('closePopupBtn');
+    const popupIframe = document.getElementById('popupIframe');
+
+    // 关闭弹窗并永久隐藏（用户主动关闭）
+    function closePopupAndHide() {
+        if (popupElement) {
+            popupElement.classList.add('hidden');
+        }
+        // 可选：清空iframe以停止资源加载
+        if (popupIframe) {
+            popupIframe.src = 'about:blank';
+        }
+    }
+
+    // 打开/显示弹窗并加载iframe（初始时显示）
+    function initPopup() {
+        if (popupIframe) {
+            popupIframe.src = TARGET_URL;
+        }
+        // 确保弹窗可见（默认有hidden类时移除）
+        if (popupElement) {
+            popupElement.classList.remove('hidden');
+        }
+    }
+
+    // 绑定关闭按钮事件
+    if (closePopupBtn) {
+        closePopupBtn.addEventListener('click', closePopupAndHide);
+    }
+
+    // 可选: 简单拖拽让用户可移动 (增强体验)
+    const popupHeader = document.getElementById('popupHeader');
+    let isDragging = false;
+    let offsetX = 0, offsetY = 0;
+
+    if (popupHeader && popupElement) {
+        popupHeader.style.cursor = 'grab';
+        popupHeader.addEventListener('mousedown', (e) => {
+            if (e.target === closePopupBtn || closePopupBtn.contains(e.target)) return;
+            isDragging = true;
+            offsetX = e.clientX - popupElement.offsetLeft;
+            offsetY = e.clientY - popupElement.offsetTop;
+            popupElement.style.transition = 'none';
+            popupHeader.style.cursor = 'grabbing';
+            e.preventDefault();
+        });
+        window.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            let left = e.clientX - offsetX;
+            let top = e.clientY - offsetY;
+            // 边界限制 (避免移出可视区)
+            left = Math.min(window.innerWidth - popupElement.offsetWidth - 10, Math.max(10, left));
+            top = Math.min(window.innerHeight - popupElement.offsetHeight - 10, Math.max(10, top));
+            popupElement.style.left = left + 'px';
+            popupElement.style.top = top + 'px';
+            popupElement.style.right = 'auto';
+            popupElement.style.bottom = 'auto';
+        });
+        window.addEventListener('mouseup', () => {
+            if (isDragging) {
+                isDragging = false;
+                popupHeader.style.cursor = 'grab';
+                popupElement.style.transition = '';
+            }
+        });
+    }
+
+    // --------------------------------------------------------------
+    // 时钟渲染函数 (与之前完全一致)
     function getTimeInZone(timeZone) {
         try {
             const now = new Date();
@@ -556,7 +733,7 @@
                         <div class="time-card">
                             <div class="country-info">
                                 <div class="country-name">${item.name}</div>
-                                <div class="city-tz"><span>📍 ${item.city}</span><span class="offset">${item.tz.split('/').pop()}</span></div>
+                                <div class="city-tz"><span>📍 ${item.city}</span><span class="offset">${item.tz.split('/').pop()}</span></div><div class="city-tz"><span>📍 ${item.city}</span><span class="offset">${item.tz.split('/').pop()}</span></div>
                             </div>
                             <div class="time-box">
                                 <div class="clock-digit">${time}</div>
@@ -585,47 +762,50 @@
                     </div>
                 `;
             }
-            html += `</div>`;
-            root.innerHTML = html;
+            html   超文本标记语言 += `</div>`;
+            root.innerHTML = html   超文本标记语言;
         }
     }
 
     function updateTopBar() {
-        const utcNow = new Date();
+        const utcNow = new   新    日期Date();
         const utcStr = utcNow.toISOString().substr(11, 8);
-        document.getElementById("baseUtcTime").innerText = utcStr;
-        const localStr = utcNow.toLocaleTimeString('en-GB', { hour12: false });
-        document.getElementById("localRef").innerText = localStr;
+        document.getElementById("baseUtcTime").innerText = utcStr;document.getElementById("baseUtcTime").innerText = utcStr;
+        const localStr = utcNow.toLocaleTimeString('en-GB', { hour12: false   假 });
+        document.getElementById("localRef").innerText = localStr;document.getElementById("localRef").innerText = localStr;
     }
 
     function startClock() {
         if (timerInterval) clearInterval(timerInterval);
-        timerInterval = setInterval(() => {
-            render();
+        timerInterval = setInterval(() => {timerInterval = setInterval(() => {
+               呈现();render();
             updateTopBar();
         }, 1000);
     }
 
     function bindFilters() {
         const btns = document.querySelectorAll(".filter-btn");
-        btns.forEach(btn => {
-            btn.addEventListener("click", () => {
+        btns.forEach(btn => {   btns .“Btn =>{”
+            btn.addEventListener("click", () => {btn.addEventListener("click", () => {
                 btns.forEach(b => b.classList.remove("active"));
-                btn.classList.add("active");
-                currentFilter = btn.getAttribute("data-continent");
-                render();
+                btn.classList.add("active");btn.classList.add("active");
+                currentFilter = btn.getAttribute("data-continent");currentFilter = btn.getAttribute("data-continent");
+                render();   呈现();
             });
         });
     }
 
-    function init() {
-        render();
+    // 页面启动
+    function init() {   函数init() {
+        render();   呈现();
         startClock();
         bindFilters();
         updateTopBar();
+        // 页面加载后展示右下角弹窗（浮窗默认显示）
+        initPopup();
     }
-
+    
     init();
-</script>
-</body>
-</html>
+</script>   < / script>
+</body>   < / body>
+</   & lt;html>   < / html>
